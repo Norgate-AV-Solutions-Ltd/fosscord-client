@@ -1,4 +1,3 @@
-import { RESTPostAPIChannelMessageJSONBody } from "@puyodead1/fosscord-api-types/v9";
 import { observer } from "mobx-react";
 import React from "react";
 import { Platform, TextInput } from "react-native";
@@ -6,7 +5,7 @@ import { useTheme } from "react-native-paper";
 import { CustomTheme } from "../../constants/Colors";
 import Channel from "../../stores/Channel";
 import { DomainContext } from "../../stores/DomainStore";
-import { Routes } from "../../utils/Endpoints";
+import Message from "../../stores/Message";
 import Container from "../Container";
 
 interface Props {
@@ -17,19 +16,6 @@ function ChatInput({ channel }: Props) {
 	const [message, setMessage] = React.useState("");
 	const theme = useTheme<CustomTheme>();
 	const domain = React.useContext(DomainContext);
-
-	const postMessage = (message: string, channel_id: string) => {
-		// check if the message is empty, contains only spaces, or contains only newlines
-		if (!message || !message.trim() || !message.replace(/\r?\n|\r/g, ""))
-			return;
-		domain.rest.post<RESTPostAPIChannelMessageJSONBody, any>(
-			Routes.channelMessages(channel_id),
-			{
-				content: message,
-				nonce: Date.now().toString(),
-			},
-		);
-	};
 
 	return (
 		<Container
@@ -62,7 +48,7 @@ function ChatInput({ channel }: Props) {
 						// send message
 						e.preventDefault();
 
-						postMessage(message, channel.id);
+						Message.send(domain, message, channel.id);
 						setMessage("");
 					}
 				}}
